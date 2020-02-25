@@ -1,0 +1,20 @@
+protoc:
+  version: 3.11.0
+lint:
+  group: uber2
+generate:
+  go_options:
+    import_path: gitlab.com/we-are-alive/grpc-specifications
+  plugins:
+    - name: go
+      type: go
+      flags: plugins=grpc
+      output: ./src/go
+    - name: grpc-gateway
+      output: ./src/go
+    - name: swagger
+      output: ./src/swagger
+    - name: java
+      output: ./src/java/src/main/java
+    - name: grpc-java
+      output: ./src/java/src/main/java

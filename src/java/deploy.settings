@@ -1,0 +1,5 @@
+siteUrl = https://gitlab.com/we-are-alive/grpc-specifications
+gitUrl = https://gitlab.com/we-are-alive/grpc-specifications.git
+groupId = vn.alive
+id = grpc-specifications
+name = grpc-specifications

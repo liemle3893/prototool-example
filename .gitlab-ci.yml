@@ -1,0 +1,38 @@
+variables:
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+  DOCKER_TLS_CERTDIR: ""
+
+stages:
+  - gen
+  - publish
+
+build:
+  image: docker:19.03.1
+  services:
+    - docker:19.03.1-dind
+  stage: build
+  script:
+    - apk update && apk add make --no-cache
+    - make clean
+    - make gen
+  tags:
+    - internal
+    - production
+  artifacts:
+    paths:
+      - src/java/*
+    expire_in: 10 minutes
+  rules:
+    - if: $CI_COMMIT_TAG
+
+publish:
+  image: gradle:5.2.1-alpine
+  stage: publish
+  script:
+    - >
+      make dist 
+        DEPLOY_VERSION=$CI_COMMIT_TAG 
+        ALIVE_ARTIFACTORY_DEPLOYER=$ALIVE_ARTIFACTORY_DEPLOYER 
+        ALIVE_ARTIFACTORY_DEPLOYER_PASWORD=$ALIVE_ARTIFACTORY_DEPLOYER_PASWORD
+  rules:
+    - if: $CI_COMMIT_TAG

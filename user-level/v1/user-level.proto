@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+option go_package = "user_level/v1";
+option java_package = "vn.alive.user_level";
+option java_outer_classname = "UserLevel";
+
+package user_level.v1;
+
+message StringMessage { string value = 1; }
+
+service UserLevelService {
+  rpc GetUserLevel(StringMessage) returns (StringMessage) {}
+}

@@ -1,0 +1,92 @@
+allprojects {
+    apply plugin: "com.jfrog.artifactory"
+}
+
+buildscript {
+    repositories {
+        maven {
+            url "https://artifactory.alive.vn/artifactory/libs-release"
+            credentials {
+                username = "${artifactory_user}"
+                password = "${artifactory_password}"
+            }
+        }
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4+"
+        classpath "io.franzbecker:gradle-lombok:1.10"
+
+    }
+}
+
+// Apply the java-library plugin to add support for Java Library
+apply plugin: 'java-library'
+apply plugin: 'maven-publish'
+apply plugin: "io.franzbecker.gradle-lombok"
+
+ext {
+    grpcVersion = "1.27.0"
+    protobufVersion = "3.8.0"
+}
+
+version = "1.0.0"
+group = "vn.alive"
+def publishArtifactId = "grpc-specifications"
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifactId publishArtifactId
+        }
+    }
+}
+
+artifactory {
+    contextUrl = "http://artifactory.alive.vn/artifactory"   //The base Artifactory URL if not overridden by the publisher/resolver
+    publish {
+        repository {
+            repoKey = "libs-release"
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+            maven = true
+
+        }
+        defaults {
+            // Reference to Gradle publications defined in the build script.
+            // This is how we tell the Artifactory Plugin which artifacts should be
+            // published to Artifactory.
+            publications('mavenJava')
+            publishArtifacts = true
+            // Properties to be attached to the published artifacts.
+            properties = ['qa.level': 'basic', 'dev.team': 'core']
+            // Publish generated POM files to Artifactory (true by default)
+            publishPom = true
+        }
+    }
+
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+// In this section you declare where to find the dependencies of your project
+repositories {
+    // Use jcenter for resolving your dependencies.
+    // You can declare any Maven/Ivy/file repository here.
+    jcenter()
+}
+
+dependencies {
+    compile "com.google.protobuf:protobuf-java:${grpcVersion}"
+    compile "io.grpc:grpc-protobuf:${grpcVersion}"
+    compile "io.grpc:grpc-stub:${grpcVersion}"
+    compileOnly "javax.annotation:javax.annotation-api:1.2"
+    compile "io.grpc:grpc-netty-shaded:${grpcVersion}"
+}
+
